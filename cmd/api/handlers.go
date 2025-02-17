@@ -45,8 +45,8 @@ func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Req
 				Published: 2019,
 				Pages:     300,
 				Genres:    []string{"Fiction", "Thriller"},
-				Rating:    4.5,
-				Version:   1,
+				//Rating:    4.5,
+				Version: 1,
 			},
 			{
 				ID:        2,
@@ -60,7 +60,7 @@ func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Req
 			},
 		}
 
-		jsonData, err := json.Marshal(books)
+		jsonData, err := json.MarshalIndent(books, "", "\t")
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
