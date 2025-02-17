@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,9 +14,22 @@ func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 			http.StatusMethodNotAllowed)
 		return
 	}
-	fmt.Fprintln(w, "I am alive!")
-	fmt.Fprintf(w, "environment: %s\n", app.config.env)
-	fmt.Fprintf(w, "version: %s\n", version)
+
+	data := map[string]string{
+		"status":      "available",
+		"environment": app.config.env,
+		"version":     version,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	jsonData = append(jsonData, '\n')
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Request) {
