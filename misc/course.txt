@@ -1,12 +1,3 @@
-healthcheck:
-curl localhost:4000/v1/healthcheck
-
-adding a book:
-curl -X POST -H "Content-Type: application/json" -d '{"title": "Tittle", 
-"published": 2020, 
-"pages": 100, 
-"genres":["Fiction", "Mystery"], 
-"rating":5.0}' localhost:4000/v1/books
-
-
+added new external package for postgres: github.com/lib/pq
+need to run "go get github.com/lib/pq" to download it
 
