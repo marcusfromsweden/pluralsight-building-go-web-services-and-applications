@@ -6,9 +6,10 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/v1/healthcheck", healthcheck)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/healthcheck", healthcheck)
 
-	err := http.ListenAndServe(":4000", nil) // nil => using default router
+	err := http.ListenAndServe(":4000", mux) // nil => using default router
 	if err != nil {
 		fmt.Println("Error starting server: ", err)
 	}
