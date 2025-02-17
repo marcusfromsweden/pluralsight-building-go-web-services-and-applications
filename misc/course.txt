@@ -1,0 +1,2 @@
+1. set up a server (http.HandleFunc) with a healthcheck endpoint
+curl localhost:4000/v1/healthcheck
