@@ -16,6 +16,12 @@ func main() {
 }
 
 func healthcheck(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w,
+			http.StatusText(http.StatusMethodNotAllowed),
+			http.StatusMethodNotAllowed)
+		return
+	}
 	fmt.Fprintln(w, "I am alive!")
 	fmt.Fprintf(w, "environment: %s\n", "dev")
 	fmt.Fprintf(w, "version: %s\n", "1.0.0")
