@@ -60,16 +60,10 @@ func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Req
 			},
 		}
 
-		jsonData, err := json.MarshalIndent(books, "", "\t")
-		if err != nil {
+		if err := app.writeJSON(w, http.StatusOK, books); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		jsonData = append(jsonData, '\n')
-		w.Header().Set("Content-Type", "application/json")
-		//w.WriteHeader(http.StatusOK)
-		w.Write(jsonData)
-		return
 	}
 
 	if r.Method == http.MethodPost {
@@ -108,16 +102,11 @@ func (app *application) getBook(w http.ResponseWriter, r *http.Request) {
 		Version:   1,
 	}
 
-	jsonData, err := json.Marshal(book)
-	if err != nil {
+	if err := app.writeJSON(w, http.StatusOK, book); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	jsonData = append(jsonData, '\n')
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
 }
 
 func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
