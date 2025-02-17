@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 const version = "1.0.0"
@@ -33,13 +34,17 @@ func main() {
 	}
 
 	serverAddress := fmt.Sprintf(":%d", cfg.port)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/healthcheck", app.healthcheck)
+	server := &http.Server{
+		Addr:         serverAddress,
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
 
 	logger.Printf("Starting (%s) server on %s", cfg.env, serverAddress)
-	err := http.ListenAndServe(serverAddress, mux)
+	err := server.ListenAndServe()
 	if err != nil {
-		fmt.Println("Error starting server: ", err)
+		logger.Fatal(err)
 	}
 }
