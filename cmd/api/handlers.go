@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
+
+	"readinglist.marcusfromsweden.com/internal/data"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +37,39 @@ func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		fmt.Fprintln(w, "display a list of the books on the reading list")
+		books := []data.Book{
+			{
+				ID:        1,
+				CreatedAt: time.Now(),
+				Title:     "Echoes from the Life",
+				Published: 2019,
+				Pages:     300,
+				Genres:    []string{"Fiction", "Thriller"},
+				Rating:    4.5,
+				Version:   1,
+			},
+			{
+				ID:        2,
+				CreatedAt: time.Now(),
+				Title:     "The Last of the Mohicans",
+				Published: 1826,
+				Pages:     400,
+				Genres:    []string{"Historical Fiction"},
+				Rating:    4.0,
+				Version:   1,
+			},
+		}
+
+		jsonData, err := json.Marshal(books)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		jsonData = append(jsonData, '\n')
+		w.Header().Set("Content-Type", "application/json")
+		//w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+		return
 	}
 
 	if r.Method == http.MethodPost {
@@ -62,7 +97,27 @@ func (app *application) getBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "display the details of book with ID: %d\n", idInt)
+	book := data.Book{
+		ID:        idInt,
+		CreatedAt: time.Now(),
+		Title:     "Echoes from the Life",
+		Published: 2019,
+		Pages:     300,
+		Genres:    []string{"Fiction", "Thriller"},
+		Rating:    4.5,
+		Version:   1,
+	}
+
+	jsonData, err := json.Marshal(book)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	jsonData = append(jsonData, '\n')
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
