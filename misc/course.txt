@@ -1,2 +1,9 @@
-1. set up a server (http.HandleFunc) with a healthcheck endpoint
+healthcheck:
 curl localhost:4000/v1/healthcheck
+
+adding a book:
+curl -X POST -H "Content-Type: application/json" -d '{"title": "Tittle", 
+"published": 2020, 
+"pages": 100, 
+"genres":["Fiction", "Mystery"], 
+"rating":3.4}' localhost:4000/v1/books

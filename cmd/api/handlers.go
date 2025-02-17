@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -67,7 +68,26 @@ func (app *application) getCreateBooksHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	if r.Method == http.MethodPost {
-		fmt.Fprintln(w, "added a new book to the reading list")
+		var input struct {
+			Title     string   `json:"title"`
+			Published int      `json:"published"`
+			Pages     int      `json:"pages"`
+			Genres    []string `json:"genres"`
+			Rating    float32  `json:"rating"`
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		err = json.Unmarshal(body, &input)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		fmt.Fprintf(w, "%v\n", input)
 	}
 }
 
@@ -116,7 +136,55 @@ func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "update the details of book with ID: %d\n", idInt)
+
+	var input struct {
+		Title     *string  `json:"title"`
+		Published *int     `json:"published"`
+		Pages     *int     `json:"pages"`
+		Genres    []string `json:"genres"`
+		Rating    *float32 `json:"rating"`
+	}
+
+	book := data.Book{
+		ID:        idInt,
+		CreatedAt: time.Now(),
+		Title:     "Echoes from the Life",
+		Published: 2019,
+		Pages:     300,
+		Genres:    []string{"Fiction", "Thriller"},
+		Rating:    4.5,
+		Version:   1,
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	err = json.Unmarshal(body, &input)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	if input.Title != nil {
+		book.Title = *input.Title
+	}
+	if input.Published != nil {
+		book.Published = *input.Published
+	}
+	if input.Pages != nil {
+		book.Pages = *input.Pages
+	}
+	if len(input.Genres) > 0 {
+		book.Genres = input.Genres
+	}
+	if input.Rating != nil {
+		book.Rating = *input.Rating
+	}
+
+	fmt.Fprintf(w, "%v\n", book)
 }
 
 func (app *application) deleteBook(w http.ResponseWriter, r *http.Request) {
