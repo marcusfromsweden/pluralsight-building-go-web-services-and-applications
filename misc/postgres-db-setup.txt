@@ -1,0 +1,25 @@
+creating and running postgres container
+-------------------------------------------
+docker run --name reading-list-db-container -e POSTGRES_PASSWORD=readinglistpass -d -p 5432:5432 postgres
+
+
+setting up postgres database
+------------------------------
+CREATE DATABASE readinglist;
+
+CREATE ROLE readinglist WITH LOGIN PASSWORD 'readinglistpass';
+
+\c readinglist // change to database
+CREATE TABLE IF NOT EXISTS books (
+    id bigserial PRIMARY KEY,  
+    created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+    title text NOT NULL,
+    published integer NOT NULL,
+    pages integer NOT NULL,
+    genres text[] NOT NULL,
+    version integer NOT NULL DEFAULT 1,
+    rating integer NOT NULL
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON books to readinglist;
+
+GRANT USAGE, SELECT ON SEQUENCE books_id_seq to readinglist;

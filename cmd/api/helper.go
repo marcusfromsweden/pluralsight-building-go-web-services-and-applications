@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -18,5 +19,25 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(jsonData)
+	return nil
+}
+
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(dst); err != nil {
+		// for more info about custom error messages, see "Let's Go Further" chapter 4 (Alex Edwards)
+		return fmt.Errorf("problem decoding body: %w", err)
+	}
+
+	err := decoder.Decode(&struct{}{}) // check for extraneous data in the request body
+	if err != io.EOF {
+		return fmt.Errorf("unexpected data in request body")
+	}
+
 	return nil
 }
